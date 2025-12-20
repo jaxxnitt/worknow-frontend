@@ -4,6 +4,7 @@ import PostJob from "./pages/PostJob";
 import ManageJobs from "./pages/ManageJobs";
 
 export default function App() {
+    const [mode, setMode] = useState("worker"); // default
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="bg-white shadow-sm">
