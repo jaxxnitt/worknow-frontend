@@ -49,20 +49,64 @@ export default function Home() {
       </p>
 
       {/* SEARCH */}
-      <div className="flex gap-2">
-        <input
-          value={city}
-          onChange={e => setCity(e.target.value)}
-          placeholder="Enter city"
-          className="flex-1 border rounded-lg px-4 py-2"
-        />
-        <button
-          onClick={() => fetchJobs(city)}
-          className="bg-black text-white px-6 rounded-lg"
-        >
-          Search
-        </button>
+    <div className="flex gap-2 relative">
+  <div className="flex-1 relative">
+    <input
+      value={city}
+      onChange={e => {
+        const val = e.target.value;
+        setCity(val);
+
+        if (val.length < 2) {
+          setSuggestions([]);
+          return;
+        }
+
+        fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&limit=6&q=${encodeURIComponent(val)}`
+        )
+          .then(r => r.json())
+          .then(data => {
+            const cities = data.map(p =>
+              p.address?.city ||
+              p.address?.town ||
+              p.address?.village ||
+              p.display_name.split(",")[0]
+            );
+            setSuggestions([...new Set(cities)]);
+          });
+      }}
+      placeholder="Enter city"
+      className="w-full border rounded-lg px-4 py-2"
+    />
+
+    {suggestions.length > 0 && (
+      <div className="absolute z-10 bg-white border rounded-lg w-full mt-1 shadow">
+        {suggestions.map(c => (
+          <div
+            key={c}
+            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+            onClick={() => {
+              setCity(c);
+              setSuggestions([]);
+              fetchJobs(c);
+            }}
+          >
+            {c}
+          </div>
+        ))}
       </div>
+    )}
+  </div>
+
+  <button
+    onClick={() => fetchJobs(city)}
+    className="bg-black text-white px-6 rounded-lg"
+  >
+    Search
+  </button>
+</div>
+
 
       {loading && <p>Loading jobs...</p>}
 
