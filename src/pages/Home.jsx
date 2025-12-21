@@ -6,6 +6,8 @@ export default function Home() {
   const [jobs, setJobs] = useState([]);
   const [city, setCity] = useState("");
   const [loading, setLoading] = useState(false);
+  const [suggestions, setSuggestions] = useState([]); // ✅ ADD THIS
+
 
   useEffect(() => {
     fetchJobs();
