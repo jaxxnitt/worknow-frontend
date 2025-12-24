@@ -1,45 +1,88 @@
 const API = "https://worknow-backend.onrender.com";
 
+/*
+  Central fetch wrapper.
+  Automatically attaches JWT if available.
+*/
+async function apiFetch(url, options = {}) {
+  const token = localStorage.getItem("token");
+
+  const headers = {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(options.headers || {}),
+  };
+
+  const response = await fetch(url, {
+    ...options,
+    headers,
+  });
+
+  // Optional: handle auth failures globally
+  if (response.status === 401 || response.status === 403) {
+    throw new Error("Unauthorized");
+  }
+
+  return response;
+}
+
+/* ===========================
+   PUBLIC (NO AUTH REQUIRED)
+   =========================== */
+
 export async function getJobs(city) {
-  const url = city ? `${API}/gigs?city=${encodeURIComponent(city)}` : `${API}/gigs`;
-  const r = await fetch(url);
+  const url = city
+    ? `${API}/gigs?city=${encodeURIComponent(city)}`
+    : `${API}/gigs`;
+
+  const r = await apiFetch(url);
   return r.json();
 }
 
+/* ===========================
+   EMPLOYER (AUTH REQUIRED)
+   =========================== */
+
 export async function postJob(data) {
-  const r = await fetch(`${API}/gigs`, {
+  const r = await apiFetch(`${API}/gigs`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
   return r.json();
 }
 
-export async function applyJob(gigId, payload) {
-  const r = await fetch(`${API}/apply/${gigId}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  return r.text();
-}
-
-export async function getMyJobs(posterName) {
-  const r = await fetch(
-    `${API}/manage/jobs?posterName=${encodeURIComponent(posterName)}`
-  );
+export async function getMyJobs() {
+  const r = await apiFetch(`${API}/manage/jobs`);
   return r.json();
 }
 
 export async function getCurrentApplicant(gigId) {
-  const r = await fetch(`${API}/manage/gigs/${gigId}/current-applicant`);
+  const r = await apiFetch(
+    `${API}/manage/gigs/${gigId}/current-applicant`
+  );
   return r.json();
 }
 
 export async function rejectApplicant(id) {
-  await fetch(`${API}/applications/${id}/reject`, { method: "POST" });
+  await apiFetch(`${API}/manage/applications/${id}/reject`, {
+    method: "POST",
+  });
 }
 
 export async function hireApplicant(id) {
-  await fetch(`${API}/applications/${id}/hire`, { method: "POST" });
+  await apiFetch(`${API}/manage/applications/${id}/hire`, {
+    method: "POST",
+  });
+}
+
+/* ===========================
+   WORKER (AUTH REQUIRED)
+   =========================== */
+
+export async function applyJob(gigId, note) {
+  const r = await apiFetch(`${API}/apply/${gigId}`, {
+    method: "POST",
+    body: JSON.stringify({ note }),
+  });
+  return r.text();
 }

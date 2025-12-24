@@ -5,10 +5,32 @@ import PostJob from "./pages/PostJob";
 import ManageJobs from "./pages/ManageJobs";
 
 export default function App() {
-  const [mode, setMode] = useState("worker"); // worker | employer
+  /*
+   * Persist mode across refreshes.
+   * Default to "worker" if nothing is stored.
+   */
+  const [mode, setMode] = useState(() => {
+    return localStorage.getItem("mode") || "worker";
+  });
+
+  /*
+   * Helper to switch mode and persist it.
+   */
+  function switchMode(newMode) {
+    setMode(newMode);
+    localStorage.setItem("mode", newMode);
+  }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div
+      /*
+       * Slight visual difference between modes.
+       * Employer mode gets a slightly darker background.
+       */
+      className={`min-h-screen ${
+        mode === "employer" ? "bg-gray-200" : "bg-gray-100"
+      }`}
+    >
       {/* HEADER */}
       <header className="bg-white shadow-sm">
         <div className="max-w-3xl mx-auto px-4 py-4 flex justify-between items-center">
@@ -26,7 +48,7 @@ export default function App() {
           <div className="flex items-center gap-4">
             <div className="flex bg-gray-100 rounded-lg p-1">
               <button
-                onClick={() => setMode("worker")}
+                onClick={() => switchMode("worker")}
                 className={`px-3 py-1 rounded-md text-sm ${
                   mode === "worker"
                     ? "bg-white shadow font-semibold"
@@ -35,8 +57,9 @@ export default function App() {
               >
                 Worker
               </button>
+
               <button
-                onClick={() => setMode("employer")}
+                onClick={() => switchMode("employer")}
                 className={`px-3 py-1 rounded-md text-sm ${
                   mode === "employer"
                     ? "bg-white shadow font-semibold"
@@ -47,7 +70,7 @@ export default function App() {
               </button>
             </div>
 
-            {/* NAV ACTIONS */}
+            {/* NAVIGATION ACTIONS */}
             {mode === "worker" && (
               <Link
                 to="/"
@@ -78,7 +101,7 @@ export default function App() {
         </div>
       </header>
 
-      {/* MAIN */}
+      {/* MAIN CONTENT */}
       <main className="max-w-3xl mx-auto px-4 py-6">
         {mode === "worker" && (
           <>
@@ -102,7 +125,7 @@ export default function App() {
                 path="/manage"
                 element={<ManageJobs />}
               />
-              {/* default employer view */}
+              {/* Default employer landing view */}
               <Route
                 path="*"
                 element={
