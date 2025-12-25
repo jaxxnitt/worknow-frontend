@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useAuth } from "../auth/AuthContext";
 
 const API = "https://worknow-backend.onrender.com";
@@ -5,29 +6,53 @@ const API = "https://worknow-backend.onrender.com";
 export default function Login() {
   const { login } = useAuth();
 
-  async function handleGoogleLogin() {
-    // Google Identity Services should give you this token
-    const idToken = window.googleToken; // placeholder
+  useEffect(() => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
-    const res = await fetch(`${API}/auth/google`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idToken })
+    if (!clientId || !window.google) {
+      return;
+    }
+
+    window.google.accounts.id.initialize({
+      client_id: clientId,
+      callback: async (response) => {
+        try {
+          const res = await fetch(`${API}/auth/google`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              idToken: response.credential
+            })
+          });
+
+          if (!res.ok) {
+            throw new Error("Login failed");
+          }
+
+          const data = await res.json();
+          login(data.token, data.user);
+        } catch (err) {
+          alert("Login failed. Please try again.");
+        }
+      }
     });
 
-    const data = await res.json();
-
-    login(data.token, data.user);
-  }
+    window.google.accounts.id.renderButton(
+      document.getElementById("google-login"),
+      {
+        theme: "outline",
+        size: "large",
+        width: 280
+      }
+    );
+  }, [login]);
 
   return (
     <div className="flex justify-center mt-20">
-      <button
-        onClick={handleGoogleLogin}
-        className="bg-black text-white px-6 py-3 rounded-lg"
-      >
-        Continue with Google
-      </button>
+      <div
+        id="google-login"
+        className="flex justify-center"
+      />
     </div>
   );
 }

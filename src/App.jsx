@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route, Link, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import PostJob from "./pages/PostJob";
 import ManageJobs from "./pages/ManageJobs";
+import Login from "./pages/Login";
+import { useAuth } from "./auth/AuthContext";
 
 export default function App() {
   /*
@@ -14,6 +16,11 @@ export default function App() {
   });
 
   /*
+   * Auth state from context
+   */
+  const { user, logout, loading } = useAuth();
+
+  /*
    * Helper to switch mode and persist it.
    */
   function switchMode(newMode) {
@@ -21,12 +28,15 @@ export default function App() {
     localStorage.setItem("mode", newMode);
   }
 
+  /*
+   * Avoid rendering app before auth state is known
+   */
+  if (loading) {
+    return <div className="p-6">Loading...</div>;
+  }
+
   return (
     <div
-      /*
-       * Slight visual difference between modes.
-       * Employer mode gets a slightly darker background.
-       */
       className={`min-h-screen ${
         mode === "employer" ? "bg-gray-200" : "bg-gray-100"
       }`}
@@ -44,8 +54,9 @@ export default function App() {
             </p>
           </div>
 
-          {/* MODE SWITCH */}
+          {/* RIGHT SIDE CONTROLS */}
           <div className="flex items-center gap-4">
+            {/* MODE SWITCH */}
             <div className="flex bg-gray-100 rounded-lg p-1">
               <button
                 onClick={() => switchMode("worker")}
@@ -70,7 +81,7 @@ export default function App() {
               </button>
             </div>
 
-            {/* NAVIGATION ACTIONS */}
+            {/* NAVIGATION */}
             {mode === "worker" && (
               <Link
                 to="/"
@@ -80,7 +91,7 @@ export default function App() {
               </Link>
             )}
 
-            {mode === "employer" && (
+            {mode === "employer" && user && (
               <>
                 <Link
                   to="/manage"
@@ -97,46 +108,71 @@ export default function App() {
                 </Link>
               </>
             )}
+
+            {/* AUTH ACTION */}
+            {!user ? (
+              <Link
+                to="/login"
+                className="text-gray-700 hover:text-black"
+              >
+                Login
+              </Link>
+            ) : (
+              <button
+                onClick={logout}
+                className="text-gray-700 hover:text-black"
+              >
+                Logout
+              </button>
+            )}
           </div>
         </div>
       </header>
 
       {/* MAIN CONTENT */}
       <main className="max-w-3xl mx-auto px-4 py-6">
-        {mode === "worker" && (
-          <>
-            <h2 className="text-xl font-semibold mb-4">
-              Available Jobs
-            </h2>
-            <Routes>
-              <Route path="/" element={<Home />} />
-            </Routes>
-          </>
-        )}
+        <Routes>
+          {/* PUBLIC ROUTES */}
+          <Route path="/login" element={<Login />} />
 
-        {mode === "employer" && (
-          <>
-            <h2 className="text-xl font-semibold mb-4">
-              Employer Dashboard
-            </h2>
-            <Routes>
+          {/* WORKER MODE */}
+          {mode === "worker" && (
+            <Route
+              path="/"
+              element={
+                <>
+                  <h2 className="text-xl font-semibold mb-4">
+                    Available Jobs
+                  </h2>
+                  <Home />
+                </>
+              }
+            />
+          )}
+
+          {/* EMPLOYER MODE (PROTECTED) */}
+          {mode === "employer" && user && (
+            <>
               <Route path="/post" element={<PostJob />} />
-              <Route
-                path="/manage"
-                element={<ManageJobs />}
-              />
-              {/* Default employer landing view */}
-              <Route
-                path="*"
-                element={
-                  <p className="text-gray-600">
-                    Post a job or manage applicants
-                  </p>
-                }
-              />
-            </Routes>
-          </>
-        )}
+              <Route path="/manage" element={<ManageJobs />} />
+            </>
+          )}
+
+          {/* EMPLOYER MODE BUT NOT LOGGED IN */}
+          {mode === "employer" && !user && (
+            <Route
+              path="*"
+              element={
+                <p className="text-gray-600">
+                  Please log in as an employer to post or manage jobs.
+                </p>
+              }
+            />
+          )}
+
+          {/* FALLBACK */}
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
       </main>
     </div>
   );
