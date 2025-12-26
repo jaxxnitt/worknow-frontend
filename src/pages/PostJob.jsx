@@ -10,15 +10,13 @@ export default function PostJob() {
   const [form, setForm] = useState({
     title: "",
     city: "",
-    pay: "",
+    payment: "",
     deadline: "Today",
-    description: "",
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Redirect unauthenticated users
   if (!isLoggedIn) {
     return (
       <div className="bg-white p-6 rounded-xl shadow">
@@ -51,15 +49,18 @@ export default function PostJob() {
     setLoading(true);
 
     try {
-      await postJob(form);
+      await postJob({
+        title: form.title,
+        city: form.city,
+        payment: Number(form.payment),
+        deadline: form.deadline,
+      });
 
-      // Reset form on success
       setForm({
         title: "",
         city: "",
-        pay: "",
+        payment: "",
         deadline: "Today",
-        description: "",
       });
 
       alert("Job posted successfully");
@@ -106,10 +107,11 @@ export default function PostJob() {
         />
 
         <input
-          name="pay"
-          value={form.pay}
+          name="payment"
+          type="number"
+          value={form.payment}
           onChange={updateField}
-          placeholder="Pay (e.g. ₹500/day)"
+          placeholder="Payment (₹)"
           required
           className="w-full border rounded-lg px-4 py-2"
         />
@@ -123,15 +125,6 @@ export default function PostJob() {
           <option value="Today">Today</option>
           <option value="Tomorrow">Tomorrow</option>
         </select>
-
-        <textarea
-          name="description"
-          value={form.description}
-          onChange={updateField}
-          placeholder="Job description"
-          rows={4}
-          className="w-full border rounded-lg px-4 py-2"
-        />
 
         <button
           disabled={loading}
