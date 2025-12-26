@@ -1,85 +1,145 @@
 import { useState } from "react";
-import CityInput from "../components/CityInput";
-
-const API = "https://worknow-backend.onrender.com/gigs";
+import { postJob } from "../client";
+import { useAuth } from "../auth/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function PostJob() {
-  const [posterName, setPosterName] = useState("");
-  const [title, setTitle] = useState("");
-  const [city, setCity] = useState("");
-  const [payment, setPayment] = useState("");
-  const [deadline, setDeadline] = useState("Today");
+  const { isLoggedIn } = useAuth();
+  const navigate = useNavigate();
+
+  const [form, setForm] = useState({
+    title: "",
+    city: "",
+    pay: "",
+    deadline: "Today",
+    description: "",
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Redirect unauthenticated users
+  if (!isLoggedIn) {
+    return (
+      <div className="bg-white p-6 rounded-xl shadow">
+        <h2 className="text-lg font-semibold mb-2">
+          Login required
+        </h2>
+        <p className="text-gray-600 mb-4">
+          You must be logged in to post a job.
+        </p>
+        <button
+          onClick={() => navigate("/login")}
+          className="bg-black text-white px-4 py-2 rounded-lg"
+        >
+          Go to Login
+        </button>
+      </div>
+    );
+  }
+
+  function updateField(e) {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
+  }
 
   async function submit(e) {
     e.preventDefault();
+    setError(null);
+    setLoading(true);
 
-    if (!city) {
-      alert("Select city from suggestions");
-      return;
+    try {
+      await postJob(form);
+
+      // Reset form on success
+      setForm({
+        title: "",
+        city: "",
+        pay: "",
+        deadline: "Today",
+        description: "",
+      });
+
+      alert("Job posted successfully");
+      navigate("/manage");
+    } catch (err) {
+      console.error(err);
+      setError(
+        err.message || "Failed to post job. Please try again."
+      );
+    } finally {
+      setLoading(false);
     }
-
-    const res = await fetch(API, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        posterName,
-        title,
-        city,
-        payment,
-        deadline
-      })
-    });
-
-    const saved = await res.json();
-    alert(`Job posted. Job ID: ${saved.id}`);
   }
 
   return (
-    <form
-      onSubmit={submit}
-      className="bg-white rounded-xl shadow p-6 space-y-4"
-    >
-      <h2 className="text-xl font-semibold">Post a Job</h2>
+    <div className="bg-white rounded-xl shadow p-6">
+      <h2 className="text-xl font-semibold mb-4">
+        Post a Job
+      </h2>
 
-      <input
-        value={posterName}
-        onChange={e => setPosterName(e.target.value)}
-        placeholder="Your name"
-        className="w-full border rounded-lg px-4 py-2"
-      />
+      {error && (
+        <div className="mb-4 text-red-600 text-sm">
+          {error}
+        </div>
+      )}
 
-      <input
-        value={title}
-        onChange={e => setTitle(e.target.value)}
-        placeholder="Work title"
-        className="w-full border rounded-lg px-4 py-2"
-      />
+      <form onSubmit={submit} className="space-y-4">
+        <input
+          name="title"
+          value={form.title}
+          onChange={updateField}
+          placeholder="Job title"
+          required
+          className="w-full border rounded-lg px-4 py-2"
+        />
 
-      <CityInput
-        value={city}
-        onSelect={setCity}
-        placeholder="City / Area"
-      />
+        <input
+          name="city"
+          value={form.city}
+          onChange={updateField}
+          placeholder="City"
+          required
+          className="w-full border rounded-lg px-4 py-2"
+        />
 
-      <input
-        value={payment}
-        onChange={e => setPayment(e.target.value)}
-        placeholder="Payment ₹"
-        className="w-full border rounded-lg px-4 py-2"
-      />
+        <input
+          name="pay"
+          value={form.pay}
+          onChange={updateField}
+          placeholder="Pay (e.g. ₹500/day)"
+          required
+          className="w-full border rounded-lg px-4 py-2"
+        />
 
-      <select
-        value={deadline}
-        onChange={e => setDeadline(e.target.value)}
-        className="w-full border rounded-lg px-4 py-2"
-      >
-        <option>Today</option>
-        <option>Tomorrow</option>
-      </select>
+        <select
+          name="deadline"
+          value={form.deadline}
+          onChange={updateField}
+          className="w-full border rounded-lg px-4 py-2"
+        >
+          <option value="Today">Today</option>
+          <option value="Tomorrow">Tomorrow</option>
+        </select>
 
-      <button className="w-full bg-black text-white py-2 rounded-lg">
-        Post Job
-      </button>
-    </form>
+        <textarea
+          name="description"
+          value={form.description}
+          onChange={updateField}
+          placeholder="Job description"
+          rows={4}
+          className="w-full border rounded-lg px-4 py-2"
+        />
+
+        <button
+          disabled={loading}
+          className="bg-black text-white px-6 py-2 rounded-lg disabled:opacity-50"
+        >
+          {loading ? "Posting..." : "Post Job"}
+        </button>
+      </form>
+    </div>
   );
 }

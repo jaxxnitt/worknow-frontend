@@ -48,8 +48,17 @@ export async function postJob(data) {
     method: "POST",
     body: JSON.stringify(data),
   });
-  return r.json();
+
+  if (!r.ok) {
+    const text = await r.text();
+    throw new Error(text || "Failed to post job");
+  }
+
+  // Guard against empty body
+  const text = await r.text();
+  return text ? JSON.parse(text) : null;
 }
+
 
 export async function getMyJobs() {
   const r = await apiFetch(`${API}/manage/jobs`);
