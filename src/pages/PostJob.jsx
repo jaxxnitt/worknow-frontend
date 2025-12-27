@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { postJob } from "../client";
+import { postJob } from "../client.js";
 import { useAuth } from "../auth/AuthContext";
 import { useNavigate } from "react-router-dom";
 
