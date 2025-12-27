@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { applyJob } from "../api/client";
 
 const API = "https://worknow-backend.onrender.com";
 
@@ -26,23 +27,19 @@ export default function Home() {
       .finally(() => setLoading(false));
   }
 
-  function apply(gigId) {
-    const name = prompt("Your name");
-    if (!name) return;
-
+  async function apply(gigId) {
+  try {
     const note =
       prompt("Why are you a good fit? (optional)") || "";
 
-    fetch(
-      `${API}/apply/${gigId}?applicantName=${encodeURIComponent(
-        name
-      )}&note=${encodeURIComponent(note)}`,
-      { method: "POST" }
-    )
-      .then(r => r.text())
-      .then(msg => alert(msg))
-      .then(() => fetchJobs(city));
+    const msg = await applyJob(gigId, note);
+    alert(msg);
+
+    fetchJobs(city);
+  } catch (err) {
+    alert(err.message || "Authentication required");
   }
+}
 
   return (
     <div className="space-y-6">
