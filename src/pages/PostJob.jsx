@@ -19,19 +19,22 @@ export default function PostJob() {
 
   if (!isLoggedIn) {
     return (
-      <div className="bg-white p-6 rounded-xl shadow">
-        <h2 className="text-lg font-semibold mb-2">
-          Login required
-        </h2>
-        <p className="text-gray-600 mb-4">
-          You must be logged in to post a job.
-        </p>
-        <button
-          onClick={() => navigate("/login")}
-          className="bg-black text-white px-4 py-2 rounded-lg"
-        >
-          Go to Login
-        </button>
+      <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg border border-white/20 animate-fadeIn">
+        <div className="text-center">
+          <div className="text-5xl mb-4">🔐</div>
+          <h2 className="text-xl font-bold mb-3 bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+            Login Required
+          </h2>
+          <p className="text-gray-500 mb-6">
+            You must be logged in to post a job.
+          </p>
+          <button
+            onClick={() => navigate("/login")}
+            className="bg-gradient-to-r from-gray-800 to-black text-white px-6 py-2.5 rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+          >
+            Go to Login
+          </button>
+        </div>
       </div>
     );
   }
@@ -63,76 +66,260 @@ export default function PostJob() {
         deadline: "Today",
       });
 
-      alert("Job posted successfully");
+      alert("Job posted successfully!");
       navigate("/manage");
     } catch (err) {
       console.error(err);
-      setError(
-        err.message || "Failed to post job. Please try again."
-      );
+      setError(err.message || "Failed to post job. Please try again.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="bg-white rounded-xl shadow p-6">
-      <h2 className="text-xl font-semibold mb-4">
-        Post a Job
-      </h2>
+    <div className="animate-fadeIn">
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+          Post a Job
+        </h2>
+        <p className="text-gray-500 mt-1">
+          Find workers for your urgent tasks
+        </p>
+      </div>
 
-      {error && (
-        <div className="mb-4 text-red-600 text-sm">
-          {error}
-        </div>
-      )}
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-white/20">
+        {error && (
+          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl animate-shake flex items-center gap-2">
+            <svg
+              className="w-5 h-5 flex-shrink-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            {error}
+          </div>
+        )}
 
-      <form onSubmit={submit} className="space-y-4">
-        <input
-          name="title"
-          value={form.title}
-          onChange={updateField}
-          placeholder="Job title"
-          required
-          className="w-full border rounded-lg px-4 py-2"
-        />
+        <form onSubmit={submit} className="space-y-5">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Job Title
+            </label>
+            <input
+              name="title"
+              value={form.title}
+              onChange={updateField}
+              placeholder="e.g., Help moving furniture"
+              required
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gray-800/20 focus:border-gray-400 transition-all duration-200 bg-white/80"
+            />
+          </div>
 
-        <input
-          name="city"
-          value={form.city}
-          onChange={updateField}
-          placeholder="City"
-          required
-          className="w-full border rounded-lg px-4 py-2"
-        />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              City
+            </label>
+            <div className="relative">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+              </div>
+              <input
+                name="city"
+                value={form.city}
+                onChange={updateField}
+                placeholder="e.g., Mumbai"
+                required
+                className="w-full border border-gray-200 rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-gray-800/20 focus:border-gray-400 transition-all duration-200 bg-white/80"
+              />
+            </div>
+          </div>
 
-        <input
-          name="payment"
-          type="number"
-          value={form.payment}
-          onChange={updateField}
-          placeholder="Payment (₹)"
-          required
-          className="w-full border rounded-lg px-4 py-2"
-        />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Payment (₹)
+            </label>
+            <div className="relative">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium">
+                ₹
+              </div>
+              <input
+                name="payment"
+                type="number"
+                value={form.payment}
+                onChange={updateField}
+                placeholder="500"
+                required
+                min="1"
+                className="w-full border border-gray-200 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-gray-800/20 focus:border-gray-400 transition-all duration-200 bg-white/80"
+              />
+            </div>
+          </div>
 
-        <select
-          name="deadline"
-          value={form.deadline}
-          onChange={updateField}
-          className="w-full border rounded-lg px-4 py-2"
-        >
-          <option value="Today">Today</option>
-          <option value="Tomorrow">Tomorrow</option>
-        </select>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Deadline
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, deadline: "Today" })}
+                className={`py-3 rounded-xl font-medium transition-all duration-200 ${
+                  form.deadline === "Today"
+                    ? "bg-gradient-to-r from-gray-800 to-black text-white shadow-md"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                <span className="flex items-center justify-center gap-2">
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  Today
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, deadline: "Tomorrow" })}
+                className={`py-3 rounded-xl font-medium transition-all duration-200 ${
+                  form.deadline === "Tomorrow"
+                    ? "bg-gradient-to-r from-gray-800 to-black text-white shadow-md"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                <span className="flex items-center justify-center gap-2">
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  Tomorrow
+                </span>
+              </button>
+            </div>
+          </div>
 
-        <button
-          disabled={loading}
-          className="bg-black text-white px-6 py-2 rounded-lg disabled:opacity-50"
-        >
-          {loading ? "Posting..." : "Post Job"}
-        </button>
-      </form>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-gray-800 to-black text-white py-3.5 rounded-xl font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:transform-none disabled:cursor-not-allowed mt-6"
+          >
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="none"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  />
+                </svg>
+                Posting Job...
+              </span>
+            ) : (
+              <span className="flex items-center justify-center gap-2">
+                Post Job
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  />
+                </svg>
+              </span>
+            )}
+          </button>
+        </form>
+      </div>
+
+      {/* Tips Section */}
+      <div className="mt-6 bg-blue-50/80 backdrop-blur-sm rounded-2xl p-5 border border-blue-100">
+        <h3 className="font-semibold text-blue-800 mb-3 flex items-center gap-2">
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          Tips for a Great Job Post
+        </h3>
+        <ul className="text-sm text-blue-700 space-y-2">
+          <li className="flex items-start gap-2">
+            <span className="text-blue-400 mt-1">•</span>
+            Be specific about what the job involves
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-blue-400 mt-1">•</span>
+            Offer competitive payment for faster responses
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-blue-400 mt-1">•</span>
+            Jobs expire after 24-48 hours based on deadline
+          </li>
+        </ul>
+      </div>
     </div>
   );
 }
