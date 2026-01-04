@@ -41,6 +41,7 @@ export default function Login() {
 
             const data = await res.json();
             login(data.token, data.user);
+            setIsLoading(false);
           } catch (err) {
             alert("Login failed. Please try again.");
             setIsLoading(false);
