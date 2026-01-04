@@ -2,14 +2,15 @@ import { useEffect, useState } from "react";
 import { applyJob } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import { useNavigate } from "react-router-dom";
+import CityInput from "../components/CityInput";
 
 const API = "https://worknow-backend.onrender.com";
 
 export default function Home() {
   const [jobs, setJobs] = useState([]);
   const [city, setCity] = useState("");
+  const [isCityValid, setIsCityValid] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [suggestions, setSuggestions] = useState([]);
   const [applyingId, setApplyingId] = useState(null);
   const { isLoggedIn } = useAuth();
   const navigate = useNavigate();
@@ -55,94 +56,36 @@ export default function Home() {
       {/* SEARCH */}
       <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-4 border border-white/20">
         <div className="flex gap-3 relative">
-          <div className="flex-1 relative">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-            </div>
-            <input
+          <div className="flex-1">
+            <CityInput
               value={city}
-              onChange={(e) => {
-                const val = e.target.value;
+              onChange={(val, isValid) => {
                 setCity(val);
-
-                if (val.length < 2) {
-                  setSuggestions([]);
-                  return;
+                setIsCityValid(isValid);
+                if (isValid) {
+                  fetchJobs(val);
                 }
-
-                fetch(
-                  `https://nominatim.openstreetmap.org/search?format=json&limit=6&q=${encodeURIComponent(
-                    val
-                  )}`
-                )
-                  .then((r) => r.json())
-                  .then((data) => {
-                    const cities = data.map(
-                      (p) =>
-                        p.address?.city ||
-                        p.address?.town ||
-                        p.address?.village ||
-                        p.display_name.split(",")[0]
-                    );
-                    setSuggestions([...new Set(cities)]);
-                  });
               }}
+              onValidSelection={setIsCityValid}
               placeholder="Search by city..."
-              className="w-full border border-gray-200 rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-gray-800/20 focus:border-gray-400 transition-all duration-200 bg-white/80"
             />
-
-            {suggestions.length > 0 && (
-              <div className="absolute z-20 bg-white border border-gray-200 rounded-xl w-full mt-2 shadow-xl overflow-hidden animate-slideDown">
-                {suggestions.map((c) => (
-                  <div
-                    key={c}
-                    className="px-4 py-3 hover:bg-gray-50 cursor-pointer flex items-center gap-2 transition-colors"
-                    onClick={() => {
-                      setCity(c);
-                      setSuggestions([]);
-                      fetchJobs(c);
-                    }}
-                  >
-                    <svg
-                      className="w-4 h-4 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                      />
-                    </svg>
-                    {c}
-                  </div>
-                ))}
-              </div>
+            {city && !isCityValid && (
+              <p className="text-xs text-amber-600 mt-1 ml-1">
+                Please select a city from the suggestions
+              </p>
             )}
           </div>
 
           <button
-            onClick={() => fetchJobs(city)}
+            onClick={() => {
+              if (!city) {
+                fetchJobs();
+              } else if (isCityValid) {
+                fetchJobs(city);
+              } else {
+                alert("Please select a city from the suggestions");
+              }
+            }}
             className="bg-gradient-to-r from-gray-800 to-black text-white px-6 py-3 rounded-xl font-medium shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center gap-2"
           >
             <svg

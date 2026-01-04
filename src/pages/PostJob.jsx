@@ -2,6 +2,7 @@ import { useState } from "react";
 import { postJob } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import { useNavigate } from "react-router-dom";
+import CityInput from "../components/CityInput";
 
 export default function PostJob() {
   const { isLoggedIn } = useAuth();
@@ -16,6 +17,7 @@ export default function PostJob() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isCityValid, setIsCityValid] = useState(false);
 
   if (!isLoggedIn) {
     return (
@@ -49,6 +51,12 @@ export default function PostJob() {
   async function submit(e) {
     e.preventDefault();
     setError(null);
+
+    if (!isCityValid) {
+      setError("Please select a city from the suggestions");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -65,6 +73,7 @@ export default function PostJob() {
         payment: "",
         deadline: "Today",
       });
+      setIsCityValid(false);
 
       alert("Job posted successfully!");
       navigate("/manage");
@@ -126,37 +135,20 @@ export default function PostJob() {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               City
             </label>
-            <div className="relative">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-              </div>
-              <input
-                name="city"
-                value={form.city}
-                onChange={updateField}
-                placeholder="e.g., Mumbai"
-                required
-                className="w-full border border-gray-200 rounded-xl pl-12 pr-4 py-3 focus:outline-none focus:ring-2 focus:ring-gray-800/20 focus:border-gray-400 transition-all duration-200 bg-white/80"
-              />
-            </div>
+            <CityInput
+              value={form.city}
+              onChange={(val, isValid) => {
+                setForm({ ...form, city: val });
+                setIsCityValid(isValid);
+              }}
+              onValidSelection={setIsCityValid}
+              placeholder="e.g., Mumbai"
+            />
+            {form.city && !isCityValid && (
+              <p className="text-xs text-amber-600 mt-1 ml-1">
+                Please select a city from the suggestions
+              </p>
+            )}
           </div>
 
           <div>
