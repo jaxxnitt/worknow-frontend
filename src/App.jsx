@@ -4,6 +4,7 @@ import Home from "./pages/Home";
 import PostJob from "./pages/PostJob";
 import ManageJobs from "./pages/ManageJobs";
 import Login from "./pages/Login";
+import Profile from "./pages/Profile";
 import { useAuth } from "./auth/AuthContext";
 
 export default function App() {
@@ -112,17 +113,25 @@ export default function App() {
                 Login
               </Link>
             ) : (
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-md">
-                  {user?.name?.charAt(0) || "U"}
-                </div>
-                <button
-                  onClick={logout}
-                  className="text-gray-500 hover:text-gray-700 text-sm font-medium transition-colors"
-                >
-                  Logout
-                </button>
-              </div>
+              <Link
+                to="/profile"
+                className="flex items-center gap-2 group"
+              >
+                {user?.picture ? (
+                  <img
+                    src={user.picture}
+                    alt="Profile"
+                    className="w-8 h-8 rounded-full shadow-md object-cover ring-2 ring-transparent group-hover:ring-gray-300 transition-all"
+                  />
+                ) : (
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-md ring-2 ring-transparent group-hover:ring-gray-300 transition-all">
+                    {user?.name?.charAt(0) || "U"}
+                  </div>
+                )}
+                <span className="text-gray-600 group-hover:text-gray-900 text-sm font-medium transition-colors hidden sm:block">
+                  {user?.name?.split(' ')[0] || "Profile"}
+                </span>
+              </Link>
             )}
           </div>
         </div>
@@ -133,6 +142,7 @@ export default function App() {
         <Routes>
           {/* PUBLIC ROUTES */}
           <Route path="/login" element={<Login />} />
+          <Route path="/profile" element={<Profile />} />
 
           {/* WORKER MODE */}
           {mode === "worker" && (

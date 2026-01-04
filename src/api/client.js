@@ -95,3 +95,15 @@ export async function applyJob(gigId, note) {
   });
   return r.text();
 }
+
+/* ===========================
+   USER PROFILE
+   =========================== */
+
+export async function getProfile() {
+  const r = await apiFetch(`${API}/me`);
+  if (!r.ok) {
+    throw new Error("Failed to fetch profile");
+  }
+  return r.json();
+}
