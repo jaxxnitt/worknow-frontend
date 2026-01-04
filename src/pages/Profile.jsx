@@ -22,7 +22,8 @@ export default function Profile() {
         setProfile(data);
       } catch (err) {
         console.error("Failed to fetch profile:", err);
-        setError("Failed to load profile data");
+        // Use local user data as fallback (from login)
+        // Don't show error since we have user data from auth context
       } finally {
         setLoading(false);
       }
