@@ -347,7 +347,8 @@ body::before {
 .badge-premium {
   @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-bold;
   background: linear-gradient(135deg, #f5af19 0%, #ee0979 100%);
-  @apply text-white shadow-md animate-glow;
+  @apply text-white shadow-md;
+  animation: glow 2s ease-in-out infinite;
 }
 
 /* ============================================
