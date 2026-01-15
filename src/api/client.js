@@ -107,3 +107,51 @@ export async function getProfile() {
   }
   return r.json();
 }
+
+/* ===========================
+   PORTFOLIO VIDEO
+   =========================== */
+
+export async function uploadPortfolioVideo(videoFile) {
+  const token = localStorage.getItem("token");
+  const formData = new FormData();
+  formData.append("video", videoFile);
+
+  const response = await fetch(`${API}/portfolio/video`, {
+    method: "POST",
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: formData,
+  });
+
+  if (response.status === 401 || response.status === 403) {
+    throw new Error("Unauthorized");
+  }
+
+  const data = await response.json();
+  if (!data.success) {
+    throw new Error(data.message || "Failed to upload video");
+  }
+  return data;
+}
+
+export async function getPortfolioVideo() {
+  const r = await apiFetch(`${API}/portfolio/video`);
+  if (!r.ok) {
+    throw new Error("Failed to fetch video");
+  }
+  return r.json();
+}
+
+export async function deletePortfolioVideo() {
+  const r = await apiFetch(`${API}/portfolio/video`, {
+    method: "DELETE",
+  });
+
+  const data = await r.json();
+  if (!data.success) {
+    throw new Error(data.message || "Failed to delete video");
+  }
+  return data;
+}

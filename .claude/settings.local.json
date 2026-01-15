@@ -3,7 +3,10 @@
     "allow": [
       "WebFetch(domain:api.github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "Bash(git fetch:*)"
+      "Bash(git fetch:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:super.money)",
+      "WebFetch(domain:swish.com)"
     ]
   }
 }
