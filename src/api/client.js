@@ -155,3 +155,43 @@ export async function deletePortfolioVideo() {
   }
   return data;
 }
+
+/* ===========================
+   GIG VIDEO
+   =========================== */
+
+export async function uploadGigVideo(gigId, videoFile) {
+  const token = localStorage.getItem("token");
+  const formData = new FormData();
+  formData.append("video", videoFile);
+
+  const response = await fetch(`${API}/gigs/${gigId}/video`, {
+    method: "POST",
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: formData,
+  });
+
+  if (response.status === 401 || response.status === 403) {
+    throw new Error("Unauthorized");
+  }
+
+  const data = await response.json();
+  if (!data.success) {
+    throw new Error(data.message || "Failed to upload video");
+  }
+  return data;
+}
+
+export async function deleteGigVideo(gigId) {
+  const r = await apiFetch(`${API}/gigs/${gigId}/video`, {
+    method: "DELETE",
+  });
+
+  const data = await r.json();
+  if (!data.success) {
+    throw new Error(data.message || "Failed to delete video");
+  }
+  return data;
+}

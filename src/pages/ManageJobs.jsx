@@ -8,6 +8,7 @@ import {
   rejectApplicant,
 } from "../api/client";
 import Confetti from "../components/Confetti";
+import GigVideoUpload from "../components/GigVideoUpload";
 
 export default function ManageJobs() {
   const { user, isLoggedIn } = useAuth();
@@ -18,6 +19,8 @@ export default function ManageJobs() {
   const [error, setError] = useState(null);
   const [actionLoading, setActionLoading] = useState(null);
   const [showHireSuccess, setShowHireSuccess] = useState(false);
+  const [editingVideoForJob, setEditingVideoForJob] = useState(null);
+  const [expandedVideos, setExpandedVideos] = useState({});
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -73,6 +76,20 @@ export default function ManageJobs() {
     } finally {
       setActionLoading(null);
     }
+  }
+
+  function toggleVideoExpand(jobId) {
+    setExpandedVideos(prev => ({
+      ...prev,
+      [jobId]: !prev[jobId]
+    }));
+  }
+
+  function handleVideoChange(jobId, newUrl) {
+    setJobs(jobs =>
+      jobs.map(j => j.id === jobId ? { ...j, videoUrl: newUrl } : j)
+    );
+    setEditingVideoForJob(null);
   }
 
   if (!isLoggedIn) {
@@ -241,7 +258,109 @@ export default function ManageJobs() {
               </svg>
               {job.deadline}
             </span>
+            {job.videoUrl && (
+              <span className="flex items-center gap-1.5 text-violet-600">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                <span className="font-medium">Has Video</span>
+              </span>
+            )}
           </div>
+
+          {/* Job Video Section */}
+          {editingVideoForJob === job.id ? (
+            <div className="mb-4 p-4 bg-gradient-to-br from-violet-50 to-pink-50 rounded-2xl">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-semibold text-gray-800 flex items-center gap-2">
+                  <svg className="w-5 h-5 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  Manage Job Video
+                </h4>
+                <button
+                  onClick={() => setEditingVideoForJob(null)}
+                  className="text-gray-500 hover:text-gray-700 p-1"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <GigVideoUpload
+                gigId={job.id}
+                videoUrl={job.videoUrl}
+                onVideoChange={(url) => handleVideoChange(job.id, url)}
+              />
+            </div>
+          ) : job.videoUrl ? (
+            <div className="mb-4">
+              {expandedVideos[job.id] ? (
+                <div className="relative rounded-xl overflow-hidden bg-black shadow-lg">
+                  <video
+                    src={job.videoUrl}
+                    controls
+                    className="w-full aspect-video object-contain"
+                    playsInline
+                  />
+                  <div className="absolute top-2 right-2 flex gap-2">
+                    <button
+                      onClick={() => toggleVideoExpand(job.id)}
+                      className="bg-black/50 text-white p-1.5 rounded-full hover:bg-black/70 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => setEditingVideoForJob(job.id)}
+                    className="absolute bottom-2 right-2 bg-white/90 text-violet-600 px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-white transition-colors flex items-center gap-1"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Edit
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => toggleVideoExpand(job.id)}
+                  className="w-full bg-gradient-to-r from-violet-100 to-pink-100 rounded-xl p-3 flex items-center justify-between hover:from-violet-200 hover:to-pink-200 transition-all duration-200 group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                      <svg className="w-5 h-5 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                    <span className="text-sm font-medium text-violet-700">View Job Video</span>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditingVideoForJob(job.id);
+                    }}
+                    className="text-violet-500 hover:text-violet-700 p-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                </button>
+              )}
+            </div>
+          ) : (
+            <button
+              onClick={() => setEditingVideoForJob(job.id)}
+              className="w-full mb-4 bg-gradient-to-r from-violet-50 to-pink-50 border-2 border-dashed border-violet-200 rounded-xl p-3 flex items-center justify-center gap-2 hover:border-violet-400 hover:from-violet-100 hover:to-pink-100 transition-all duration-200 group"
+            >
+              <svg className="w-5 h-5 text-violet-400 group-hover:text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              <span className="text-sm font-medium text-violet-500 group-hover:text-violet-600">Add Job Video</span>
+            </button>
+          )}
 
           <button
             onClick={() => loadApplicant(job.id)}

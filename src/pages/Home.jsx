@@ -9,6 +9,7 @@ const API = "https://worknow-backend.onrender.com";
 
 function ApplyModal({ job, onClose, onApply, isApplying }) {
   const [note, setNote] = useState("");
+  const [showModalVideo, setShowModalVideo] = useState(false);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
@@ -19,7 +20,7 @@ function ApplyModal({ job, onClose, onApply, isApplying }) {
       />
 
       {/* Modal */}
-      <div className="relative glass-vibrant rounded-t-3xl sm:rounded-3xl w-full max-w-lg p-6 animate-slideUp">
+      <div className="relative glass-vibrant rounded-t-3xl sm:rounded-3xl w-full max-w-lg p-6 animate-slideUp max-h-[90vh] overflow-y-auto">
         {/* Handle bar (mobile) */}
         <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-4 sm:hidden" />
 
@@ -36,6 +37,43 @@ function ApplyModal({ job, onClose, onApply, isApplying }) {
             </p>
           </div>
         </div>
+
+        {/* Job Video in Modal */}
+        {job.videoUrl && (
+          <div className="mb-4">
+            {showModalVideo ? (
+              <div className="relative rounded-xl overflow-hidden bg-black shadow-lg">
+                <video
+                  src={job.videoUrl}
+                  controls
+                  autoPlay
+                  className="w-full aspect-video object-contain"
+                  playsInline
+                />
+                <button
+                  onClick={() => setShowModalVideo(false)}
+                  className="absolute top-2 right-2 bg-black/50 text-white p-1.5 rounded-full hover:bg-black/70 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowModalVideo(true)}
+                className="w-full bg-gradient-to-r from-violet-100 to-pink-100 rounded-xl p-3 flex items-center justify-center gap-2 hover:from-violet-200 hover:to-pink-200 transition-all duration-200 group"
+              >
+                <div className="w-8 h-8 bg-gradient-to-br from-violet-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                  <svg className="w-4 h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </div>
+                <span className="text-sm font-medium text-violet-700">Watch Job Video</span>
+              </button>
+            )}
+          </div>
+        )}
 
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -90,6 +128,7 @@ function ApplyModal({ job, onClose, onApply, isApplying }) {
 function JobCard({ job, index, onApply, isApplying, isLoggedIn }) {
   const [touchStart, setTouchStart] = useState(null);
   const [touchDelta, setTouchDelta] = useState(0);
+  const [showVideo, setShowVideo] = useState(false);
   const cardRef = useRef(null);
 
   const handleTouchStart = (e) => {
@@ -144,11 +183,63 @@ function JobCard({ job, index, onApply, isApplying, isLoggedIn }) {
         </div>
       )}
 
+      {/* Video Badge - show only if not showing urgency badge */}
+      {job.videoUrl && urgencyLevel !== "high" && (
+        <div className="absolute top-3 right-3 bg-gradient-to-r from-violet-500 to-purple-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg flex items-center gap-1">
+          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+          Video
+        </div>
+      )}
+
       <div className="flex justify-between items-start mb-3">
         <h2 className="font-bold text-lg text-gray-800 group-hover:text-gray-900 transition-colors pr-20">
           {job.title}
         </h2>
       </div>
+
+      {/* Job Video */}
+      {job.videoUrl && (
+        <div className="mb-4">
+          {showVideo ? (
+            <div className="relative rounded-xl overflow-hidden bg-black shadow-lg">
+              <video
+                src={job.videoUrl}
+                controls
+                className="w-full aspect-video object-contain"
+                playsInline
+              />
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowVideo(false);
+                }}
+                className="absolute top-2 right-2 bg-black/50 text-white p-1.5 rounded-full hover:bg-black/70 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowVideo(true);
+              }}
+              className="w-full bg-gradient-to-r from-violet-100 to-pink-100 rounded-xl p-3 flex items-center justify-center gap-2 hover:from-violet-200 hover:to-pink-200 transition-all duration-200 group"
+            >
+              <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                <svg className="w-5 h-5 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </div>
+              <span className="text-sm font-medium text-violet-700">Watch Job Video</span>
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Payment Badge */}
       <div className="flex items-center gap-3 mb-4">
