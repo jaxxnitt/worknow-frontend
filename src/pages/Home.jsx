@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import CityInput from "../components/CityInput";
 import Confetti from "../components/Confetti";
 
-const API = "https://worknow-backend.onrender.com";
+const API = "https://worknow-backend-production.up.railway.app";
 
 function ApplyModal({ job, onClose, onApply, isApplying }) {
   const [note, setNote] = useState("");

@@ -3,7 +3,7 @@ import { useAuth } from "../auth/AuthContext";
 import { useNavigate } from "react-router-dom";
 import Confetti from "../components/Confetti";
 
-const API = "https://worknow-backend.onrender.com";
+const API = "https://worknow-backend-production.up.railway.app";
 
 export default function Login() {
   const { login, isLoggedIn } = useAuth();

@@ -1,4 +1,4 @@
-const APPLY_API = "https://worknow-backend.onrender.com/apply";
+const APPLY_API = "https://worknow-backend-production.up.railway.app/apply";
 
 export default function JobCard({ job }) {
   async function apply() {
